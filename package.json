@@ -1,0 +1,27 @@
+{
+  "name": "allcountjs-loopback",
+  "version": "1.0.0",
+  "description": "AllcountJS Loopback backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/allcount/allcountjs-loopback.git"
+  },
+  "keywords": [
+    "AllcountJS",
+    "RAD",
+    "loopback"
+  ],
+  "author": "Pavel Tiunov",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/allcount/allcountjs-loopback/issues"
+  },
+  "homepage": "https://github.com/allcount/allcountjs-loopback#readme",
+  "dependencies": {
+    "underscore": "^1.8.3"
+  }
+}
