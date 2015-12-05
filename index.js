@@ -4,6 +4,8 @@ exports.installModule = function (injection) {
         'loopbackModelCompileService',
         'loopbackCrudHookService'
     ]);
+    injection.bindFactory('loopbackDatasourceService', require('./loopback-datasource-service'));
+    injection.bindMultipleBefore('compileServices', 'entityDescriptionService', ['loopbackDatasourceService']);
     injection.bindFactory('loopbackRolesResolverCompileService', require('./loopback-roles-resolver-compile-service'));
     injection.bindFactory('loopbackCrudHookService', require('./loopback-crud-hook-service'));
     injection.bindMultiple('compileServices', ['loopbackRolesResolverCompileService']);

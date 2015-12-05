@@ -1,20 +1,22 @@
 var _ = require('underscore');
 
-module.exports = function (loopback, loopbackApp, storageDriver, referenceNameService) {
+module.exports = function (loopback, loopbackApp, storageDriver, referenceNameService, loopbackDatasourceService) {
     return {
         entity: function (entityTypeId, persistenceEntityTypeId) {
             var self = this;
             return function (entityDescription) {
                 var model = {};
-                var builder = self.entityBuilder(entityTypeId, persistenceEntityTypeId, model);
+                var config = {dataSource: loopbackDatasourceService.defaultDatasource};
+                var builder = self.entityBuilder(entityTypeId, persistenceEntityTypeId, model, config);
                 entityDescription.invokePropertiesOn(builder);
-                if (loopback.findModel(persistenceEntityTypeId) && loopback.findModel(persistenceEntityTypeId).extend) { //TODO is it check extend the only way to figure out is it model stub or already defined?
+                var dataSource = model.ds;
+                if (loopback.findModel(persistenceEntityTypeId) && loopback.findModel(persistenceEntityTypeId).extend) { //TODO is check extend the only way to figure out is it model stub or already defined?
                     model.base = persistenceEntityTypeId;
                 }
-                loopbackApp.model(loopback.createModel(model), {dataSource: 'db'}); //TODO datasource
+                loopbackApp.model(loopback.createModel(model), config);
             }
         },
-        entityBuilder: function (entityTypeId, persistenceEntityTypeId, model) {
+        entityBuilder: function (entityTypeId, persistenceEntityTypeId, model, config) {
             model.name = persistenceEntityTypeId;
             model.base = "PersistedModel";
             model.idInjection = true;
@@ -36,7 +38,7 @@ module.exports = function (loopback, loopbackApp, storageDriver, referenceNameSe
                     };
                     var evaluatedFields = fields.evaluateProperties();
                     model.properties = _.chain(evaluatedFields).map(function (field, fieldName) {
-                        if (fields.notPersisted || field.fieldType.id === 'reference') {
+                        if (field.fieldType.notPersisted || field.fieldType.id === 'reference') {
                             return;
                         }
                         var type = fieldMappings[field.fieldType.id] || field.fieldType.id;
@@ -101,6 +103,9 @@ module.exports = function (loopback, loopbackApp, storageDriver, referenceNameSe
                             }
                         }))
                     }).flatten().value();
+                },
+                dataSource: function (ds) {
+                  config.dataSource = ds;
                 }
             }
         }
