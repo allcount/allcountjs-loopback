@@ -1,7 +1,6 @@
 var _ = require('underscore');
-var Q = require('q');
 
-module.exports = function (loopback, loopbackApp, crudHookUtil, storageDriver, injection) {
+module.exports = function (loopback, loopbackApp, crudHookUtil, storageDriver, injection, Q) {
     return {
         entity: function (entityTypeId, persistenceEntityTypeId) {
             return function (description) {
