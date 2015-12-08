@@ -89,7 +89,7 @@ module.exports = function (loopback, loopbackApp, storageDriver, referenceNameSe
                 },
                 permissions: function (permissions) {
                     model.acls = _.chain(permissions.evaluateProperties()).map(function (roles, permission) {
-                        return _.union([{
+                        return roles != null && _.union([{
                             "accessType": permission === 'read' ? "READ" : "WRITE",
                             "principalType": "ROLE",
                             "principalId": "$everyone",
@@ -101,7 +101,12 @@ module.exports = function (loopback, loopbackApp, storageDriver, referenceNameSe
                                 "principalId": role,
                                 "permission": "ALLOW"
                             }
-                        }))
+                        })) || [{
+                            "accessType": permission === 'read' ? "READ" : "WRITE",
+                            "principalType": "ROLE",
+                            "principalId": "$everyone",
+                            "permission": "ALLOW"
+                        }]
                     }).flatten().value();
                 },
                 dataSource: function (ds) {
