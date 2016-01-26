@@ -304,23 +304,39 @@ module.exports = function (loopback, Q) {
         return Q.nfbind(gridStore.unlink.bind(gridStore))();
     };
 
-    var afterCrudListeners = {};
-    var beforeCrudListeners = {};
+    service.operationsListenerFn = function (table, listener) {
+        return function (ctx, next) {
+            return Q.all([ctx.instance, ctx.currentInstance].map(function (e) {
+                return e && service.prefetchReferencesAndConvertFromStorage(table, e);
+            })).then(function (instanceAndCurrent) {
+                return Q(listener(instanceAndCurrent[0], instanceAndCurrent[1]));
+            }).nodeify(next);
+        }
+    }
 
     service.addAfterCrudListener = function (table, listener) {
-        addCrudListener(afterCrudListeners, table, listener);
+        var listenerFn = service.operationsListenerFn(table, listener);
+        loopback.getModel(table.tableName).observe('after save', listenerFn);
+        loopback.getModel(table.tableName).observe('after delete', listenerFn);
+        return {
+            remove: function () {
+                loopback.getModel(table.tableName).removeObserver('after save', listenerFn)
+                loopback.getModel(table.tableName).removeObserver('after delete', listenerFn);
+            }
+        }
     };
 
     service.addBeforeCrudListener = function (table, listener) {
-        addCrudListener(beforeCrudListeners, table, listener);
-    };
-
-    function addCrudListener(listeners, table, listener) {
-        if (!listeners[table.tableName]) {
-            listeners[table.tableName] = [];
+        var listenerFn = service.operationsListenerFn(table, listener);
+        loopback.getModel(table.tableName).observe('before save', listenerFn);
+        loopback.getModel(table.tableName).observe('before delete', listenerFn);
+        return {
+            remove: function () {
+                loopback.getModel(table.tableName).removeObserver('before save', listenerFn)
+                loopback.getModel(table.tableName).removeObserver('before delete', listenerFn);
+            }
         }
-        listeners[table.tableName].push(listener);
-    }
+    };
 
     service.closeConnection = function () {
         var defer = Q.defer();
