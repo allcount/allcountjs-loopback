@@ -1,6 +1,6 @@
 var _ = require('underscore');
 
-module.exports = function (loopback, Q) {
+module.exports = function (loopback, Q, injection) {
     var service = {};
 
     service.addOnConnectListener = function (listener) {
@@ -171,15 +171,26 @@ module.exports = function (loopback, Q) {
     };
 
     service.updateInstance = function (table, entity, modelInstance) {
-        var toUpdate = toStorage(table)(entity);
+        var toUpdate = toStorage(table, false)(entity);
         _.forEach(toUpdate, function (value, field) {
-            modelInstance[field] = value;
+            if (_.isFunction(modelInstance[field])) {
+                modelInstance[field + 'Id'] = value;
+                modelInstance.__cachedRelations[field] = undefined; //TODO hack: find a way how to reset cache straightforward
+            } else {
+                modelInstance[field] = value
+            };
         });
     };
+
     service.updateEntity = function (table, entity) {
         return Q(modelFor(table).findById(entity.id)).then(function (modelInstance) {
-            service.updateInstance(table, entity, modelInstance);
-            return modelInstance.save();
+            return service.prefetchReferencesAndConvertFromStorage(table, modelInstance).then(function (oldEntity) {
+                var scope = {OldEntity: oldEntity}
+                service.updateInstance(table, entity, modelInstance);
+                return injection.inScope(scope, function () {
+                    return modelInstance.save();
+                })
+            })
         })
     };
 
@@ -233,11 +244,11 @@ module.exports = function (loopback, Q) {
         })
     };
 
-    function toStorage(table) {
+    function toStorage(table, referenceHack) {
         return function (entity) {
             return convertEntity(table.fields, function (value, field, entity, fieldName) {
                 return service.serializers[table.entityTypeId][fieldName].toStorageValue(value, field, entity, fieldName);
-            }, entity, true);
+            }, entity, _.isUndefined(referenceHack) ? true : referenceHack);
         }
     }
 
