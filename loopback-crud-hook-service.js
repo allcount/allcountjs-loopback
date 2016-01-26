@@ -23,7 +23,7 @@ module.exports = function (loopback, loopbackApp, crudHookUtil, storageDriver, i
                                     Entity: instanceAndCurrent[0],
                                     OldEntity: instanceAndCurrent[0]
                                 };
-                                return hookFn(scope).then(function () {
+                                return Q(hookFn(scope)).then(function () {
                                     storageDriver.updateInstance(
                                         entityDescriptionService.tableDescription(entityTypeId),
                                         _.extendOwn({}, instanceAndCurrent[0]),
