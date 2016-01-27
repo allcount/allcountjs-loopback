@@ -7,8 +7,9 @@ module.exports = function (loopback, loopbackApp, crudHookUtil, storageDriver, i
                 crudHookUtil.invokeCrudHooks(description, function (prefix, method, hookFn) {
                     loopback.getModel(persistenceEntityTypeId).observe(prefix + ' ' + (method === 'Delete' ? 'delete' : 'save'), function (ctx, next) {
                         var entityDescriptionService = injection.inject('entityDescriptionService');
-                        if (ctx.isNewInstance === true && method === 'Create' ||
-                            ctx.isNewInstance === false && method === 'Update' ||
+                        var oldEntity = injection.inject('OldEntity', true);
+                        if (!oldEntity && method === 'Create' ||
+                            oldEntity && method === 'Update' ||
                             method === 'Save' || method === 'Delete') {
                             Q.all([ctx.instance, ctx.currentInstance].map(function (e) {
                                 return e ? storageDriver.prefetchReferencesAndConvertFromStorage(entityDescriptionService.tableDescription(entityTypeId), e).then(function (e) {
