@@ -1,6 +1,6 @@
 {
   "name": "allcountjs-loopback",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "AllcountJS Loopback backend",
   "main": "index.js",
   "scripts": {
