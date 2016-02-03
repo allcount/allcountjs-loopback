@@ -30,7 +30,12 @@ module.exports = function (loopback, loopbackApp, storageDriver, referenceNameSe
                             "type": "number",
                             "dataType": "decimal",
                             "precision": 15,
-                            "scale": 2
+                            "scale": 2,
+                            mssql: {
+                                dataType: "decimal",
+                                dataPrecision: 15,
+                                dataScale: 2
+                            }
                         },
                         'integer': {
                             type: 'number'
