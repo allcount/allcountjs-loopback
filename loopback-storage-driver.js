@@ -57,7 +57,7 @@ module.exports = function (loopback, Q, injection) {
                 return !!fields[i[0]]
             }) || [], [/*['modifyTime', -1]*/] //TODO
         ).map(function (propertyAndDir) {
-                return propertyAndDir[0] + ' ' + (propertyAndDir === -1 ? 'DESC' : 'ASC')
+                return propertyAndDir[0] + ' ' + (propertyAndDir[1] === -1 ? 'DESC' : 'ASC')
             });
         return sorting.length && sorting || undefined;
     }
