@@ -90,7 +90,7 @@ module.exports = function (loopback, Q, injection) {
                 if (split.length > 0) {
                     query.or = _.chain(table.fields).map(function (field, fieldName) {
                         if (field.fieldType.id === 'text') {
-                            return _.object([[fieldName, new RegExp('.*' + split.join('.*') + '.*', 'i')]]) //TODO mongo
+                            return _.object([[fieldName, new RegExp('.*' + split.join('.*') + '.*', 'i')]]);
                         }
                     }).filter(_.identity).value()
                 }
