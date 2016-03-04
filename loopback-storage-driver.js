@@ -88,7 +88,11 @@ module.exports = function (loopback, Q, injection) {
             if (filteringAndSorting.textSearch) {
                 var split = splitText(filteringAndSorting.textSearch);
                 if (split.length > 0) {
-                    query.$and = split.map(function (value) { return {__textIndex: { $regex: "^" + value + ".*" }}});
+                    query.or = _.chain(table.fields).map(function (field, fieldName) {
+                        if (field.fieldType.id === 'text') {
+                            return _.object([[fieldName, new RegExp('.*' + split.join('.*') + '.*', 'i')]]) //TODO mongo
+                        }
+                    }).filter(_.identity).value()
                 }
             }
             if (filteringAndSorting.filtering) {
